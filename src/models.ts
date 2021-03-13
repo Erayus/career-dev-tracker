@@ -3,3 +3,8 @@ export interface IRole {
     title: string;
     description: string;
 }
+
+export interface IResource {
+    title: string;
+    url: string;
+}
