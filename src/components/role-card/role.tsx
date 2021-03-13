@@ -8,6 +8,7 @@ import {
   CardActionArea,
   CardActions,
   CardMedia,
+  Divider,
 } from "@material-ui/core";
 
 interface IProps {
@@ -18,18 +19,24 @@ interface IProps {
 }
 
 const useStyles = makeStyles({
-  root: {},
+  root: {
+    boxShadow: "0px 2px 5px rgba(0, 0, 0, 0.3)",
+  },
   content: {
     paddingTop: 40,
     display: "flex",
     height: 200,
     flexDirection: "column",
-    textAlign: "left"
+    textAlign: "left",
   },
   media: {
     height: 200,
     backgroundSize: "contain",
+    backgroundColor: "grey",
   },
+  actionBtn: {
+    margin: "auto"
+  }
 });
 
 export const Role: React.FC<IProps> = ({
@@ -57,10 +64,10 @@ export const Role: React.FC<IProps> = ({
           </Typography>
         </CardContent>
       </CardActionArea>
-
-      <CardActions>
-        <Button size="small" color="primary" onClick={() => clicked(roleId)}>
-          Learn More
+      <Divider />
+      <CardActions >
+        <Button className={classes.actionBtn} size="small" variant="contained" color="primary" onClick={() => clicked(roleId)}>
+          How To Be Successful In This Role
         </Button>
       </CardActions>
     </Card>

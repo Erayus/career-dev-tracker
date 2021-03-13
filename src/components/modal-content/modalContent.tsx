@@ -1,6 +1,6 @@
 import { createStyles, makeStyles, Theme } from "@material-ui/core/styles";
 import React from "react";
-import { IRole } from "../../models";
+import { IRole, ISkillLevels, SkillLevel } from "../../models";
 import Accordion from "@material-ui/core/Accordion";
 import AccordionDetails from "@material-ui/core/AccordionDetails";
 import AccordionSummary from "@material-ui/core/AccordionSummary";
@@ -9,40 +9,42 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import Chip from "@material-ui/core/Chip";
 import Divider from "@material-ui/core/Divider";
 import clsx from "clsx";
-import green from "@material-ui/core/colors/green";
-
+import { blue, deepPurple, orange, green } from "@material-ui/core/colors";
 interface IProps {
   selectedRole: IRole;
 }
-
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     modalContent: {
       backgroundColor: theme.palette.background.paper,
       boxShadow: theme.shadows[5],
-      padding: theme.spacing(2, 4, 3),
       border: 0,
       borderRadius: 4,
       width: 300,
       [theme.breakpoints.up("sm")]: {
-        width: 500,
+        width: 800,
       },
+      maxHeight: window.innerHeight - 100,
+      overflowY: "auto",
+    },
+    modalContentHeader: {
+      textAlign: "center",
+      padding: theme.spacing(3, 4),
+      fontWeight: "bolder",
+    },
+    modalContentBody: {
+      padding: theme.spacing(2, 4, 3),
     },
     heading: {
       fontSize: theme.typography.pxToRem(18),
       fontWeight: "bold",
-    },
-    secondaryHeading: {
-      fontSize: theme.typography.pxToRem(15),
-      color: theme.palette.text.secondary,
     },
     icon: {
       verticalAlign: "bottom",
       height: 20,
       width: 20,
     },
-    details: {
-    },
+    details: {},
     headColumn: {
       display: "flex",
       flexBasis: "40%",
@@ -53,10 +55,10 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     contentRightColumn: {
       flexBasis: "40%",
+      borderLeft: `2px solid ${theme.palette.divider}`,
     },
     helper: {
-      borderLeft: `2px solid ${theme.palette.divider}`,
-      padding: theme.spacing(0.5, 1),
+      padding: theme.spacing(0.5, 2),
     },
     link: {
       color: theme.palette.primary.main,
@@ -68,77 +70,101 @@ const useStyles = makeStyles((theme: Theme) =>
       },
     },
     chip: {
-      marginLeft: theme.spacing(1),
+      position: "absolute",
+      right: 50
     },
   })
 );
 const ModalContent: React.FC<IProps> = ({ selectedRole }) => {
   const classes = useStyles();
-  const skillsLevelColor = {
-    understanding: green[500],
+  const getSkillsLevelColor = (skillsLevelColor: ISkillLevels): string => {
+    switch (skillsLevelColor) {
+      case SkillLevel.UNDERSTANDING:
+        return green[500];
+      case SkillLevel.DEMONSTRATING:
+        return blue[500];
+      case SkillLevel.LEADING:
+        return deepPurple[500];
+      case SkillLevel.COACHING:
+        return orange[500];
+      default:
+        return "#fff";
+    }
   };
-  return (
-    <div className={classes.modalContent}>
-      <Accordion defaultExpanded>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-          aria-controls="panel1c-content"
-          id="panel1c-header"
-        >
-          <div className={classes.headColumn}>
-            <Typography className={classes.heading}>Compassion</Typography>
-          </div>
-          <div className={classes.headColumn}>
-            <Typography className={classes.secondaryHeading}>
-              <Chip
-                className={classes.chip}
-                style={{
-                  backgroundColor: skillsLevelColor["understanding"],
-                  color: "white",
-                }}
-                label="Understanding"
-              />
+
+  const accordion = selectedRole.skills.map((skill, index) => (
+    <Accordion key={index}>
+      <AccordionSummary
+        expandIcon={<ExpandMoreIcon />}
+        aria-controls="panel1c-content"
+        id="panel1c-header"
+      >
+        <Typography className={classes.heading}>{skill.name}</Typography>
+        <Chip
+          className={classes.chip}
+          style={{
+            backgroundColor: getSkillsLevelColor(skill.level),
+            color: "white",
+          }}
+          label={skill.level}
+        />
+      </AccordionSummary>
+      <Divider />
+
+      <AccordionDetails className={classes.details}>
+        <div className={clsx(classes.contentLeftColumn, classes.helper)}>
+          <div>
+            <Typography variant="subtitle1"> <strong>Description:</strong></Typography>
+            <Typography variant="body2" paragraph>
+              {skill.description}
             </Typography>
           </div>
-        </AccordionSummary>
-        <Divider />
-
-        <AccordionDetails className={classes.details}>
-          <div className={classes.contentLeftColumn}>
-            <div>
-              <Typography variant="subtitle1">Description:</Typography>
-              <Typography variant="body2" paragraph>
-                This is a description
-              </Typography>
-            </div>
-            <div>
-              <Typography variant="subtitle1">Requirements:</Typography>
-              <Typography variant="body2" paragraph>
-                This is a requirement
-              </Typography>
-            </div>
-            <div>
-              <Typography variant="subtitle1">How:</Typography>
-              <Typography variant="body2" paragraph>
-                This is an instruction
-              </Typography>
-            </div>
-          </div>
-          <div className={clsx(classes.contentRightColumn, classes.helper)}>
-            <Typography variant="subtitle1">Resources:</Typography>
+          <div>
+            <Typography variant="subtitle1"><strong>Requirements:</strong></Typography>
             <ul>
-              <li>
-                <a
-                  href="#secondary-heading-and-columns"
-                  className={classes.link}
-                >
-                  Learn more more more more more more more more
-                </a>
-              </li>
+              {skill.requirements.map((requirement, index) => (
+                <li key={index}>{requirement}</li>
+              ))}
             </ul>
           </div>
-        </AccordionDetails>
-      </Accordion>
+          <div>
+            <Typography variant="subtitle1"><strong>How:</strong></Typography>
+            <ul>
+              {skill.instructions.length > 0
+                ? skill.instructions.map((instruction, index) => (
+                    <li key={index}>{instruction}</li>
+                  ))
+                : "No data yet"}
+            </ul>
+          </div>
+        </div>
+        <div className={clsx(classes.contentRightColumn, classes.helper)}>
+          <Typography variant="subtitle1"><strong>Resources:</strong></Typography>
+          <ul>
+            {skill.resources.length > 0
+              ? skill.resources.map((resource, index) => (
+                  <li key={index}>
+                    <a href={resource.url} className={classes.link}>
+                      {resource.title}
+                    </a>
+                  </li>
+                ))
+              : "No data yet"}
+          </ul>
+        </div>
+      </AccordionDetails>
+    </Accordion>
+  ));
+
+  return (
+    <div className={classes.modalContent}>
+      <div className={classes.modalContentHeader}>
+        <Typography variant="h5">
+          How to be successful in {selectedRole.title} role
+        </Typography>
+      </div>
+      <Divider />
+      <div className={classes.modalContentBody}>{accordion}</div>
     </div>
   );
 };
